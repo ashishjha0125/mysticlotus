@@ -2,6 +2,7 @@ import { createFileRoute, Navigate, Outlet } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { HealerSidebar } from "@/components/healer/HealerSidebar";
 import { Loader2 } from "lucide-react";
+import { hasPractitionerRole } from "@/services/users.service";
 
 export const Route = createFileRoute("/healer")({
   component: HealerLayout,
@@ -24,7 +25,11 @@ function HealerLayout() {
     return <Navigate to="/login" replace />;
   }
 
-  if (admin?.role !== "healer") {
+  const isPractitionerOrAdmin =
+    admin?.role === "admin" ||
+    hasPractitionerRole(admin?.roles || admin?.role);
+
+  if (!isPractitionerOrAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -59,6 +59,7 @@ function AddHealerDialog() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const [primaryModality, setPrimaryModality] = useState("Pranic Healing");
 
   const createMutation = useMutation({
@@ -67,15 +68,17 @@ function AddHealerDialog() {
         name,
         email,
         phone: phone || undefined,
+        password: password || undefined,
         primaryModality: primaryModality || "Pranic Healing",
       }),
     onSuccess: (newHealer) => {
-      toast.success("Healer created successfully");
+      toast.success("Healer created successfully & login account registered if password was entered!");
       qc.invalidateQueries({ queryKey: ["healers"] });
       setOpen(false);
       setName("");
       setEmail("");
       setPhone("");
+      setPassword("");
       setPrimaryModality("Pranic Healing");
       navigate({ to: "/healers/$id", params: { id: newHealer.id } });
     },
@@ -87,14 +90,14 @@ function AddHealerDialog() {
       <DialogTrigger asChild>
         <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
           <UserPlus className="mr-1.5 h-4 w-4" />
-          Add Healer
+          Add Healer / Practitioner
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New Healer</DialogTitle>
+          <DialogTitle>Add New Practitioner Account</DialogTitle>
           <DialogDescription>
-            Create a basic healer profile. You will be redirected to the full moderation profile form to add rich details immediately after creation.
+            Create a practitioner account with an optional login password so they can log into HealConnect immediately.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -103,7 +106,7 @@ function AddHealerDialog() {
             if (!name.trim() || !email.trim()) return;
             createMutation.mutate();
           }}
-          className="flex flex-col gap-4 py-2"
+          className="flex flex-col gap-4 py-2 max-h-[70vh] overflow-y-auto pr-1"
         >
           <div className="flex flex-col gap-1.5">
             <Label>Full Name *</Label>
@@ -112,6 +115,18 @@ function AddHealerDialog() {
           <div className="flex flex-col gap-1.5">
             <Label>Email *</Label>
             <Input required type="email" placeholder="e.g. maya@healing.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label className="flex items-center justify-between">
+              <span>Create Login Password</span>
+              <span className="text-[10px] text-muted-foreground font-normal">(Optional - allows practitioner to log in immediately)</span>
+            </Label>
+            <Input
+              type="text"
+              placeholder="e.g. Healer@1234 (Share with practitioner)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label>Phone</Label>

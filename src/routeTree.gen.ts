@@ -12,11 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SeekerSignupRouteImport } from './routes/seeker-signup'
 import { Route as SeekerLoginRouteImport } from './routes/seeker-login'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HealerSignupRouteImport } from './routes/healer-signup'
 import { Route as HealerRouteImport } from './routes/healer'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HealerSettingsRouteImport } from './routes/healer.settings'
+import { Route as HealerProfileRouteImport } from './routes/healer.profile'
+import { Route as HealerEventsRouteImport } from './routes/healer.events'
+import { Route as HealerEarningsRouteImport } from './routes/healer.earnings'
 import { Route as HealerDashboardRouteImport } from './routes/healer.dashboard'
+import { Route as HealerBookingsRouteImport } from './routes/healer.bookings'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
 import { Route as AuthenticatedSeekersRouteImport } from './routes/_authenticated.seekers'
@@ -52,6 +58,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HealerSignupRoute = HealerSignupRouteImport.update({
+  id: '/healer-signup',
+  path: '/healer-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HealerRoute = HealerRouteImport.update({
   id: '/healer',
   path: '/healer',
@@ -71,9 +82,34 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HealerSettingsRoute = HealerSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => HealerRoute,
+} as any)
+const HealerProfileRoute = HealerProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => HealerRoute,
+} as any)
+const HealerEventsRoute = HealerEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => HealerRoute,
+} as any)
+const HealerEarningsRoute = HealerEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => HealerRoute,
+} as any)
 const HealerDashboardRoute = HealerDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => HealerRoute,
+} as any)
+const HealerBookingsRoute = HealerBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
   getParentRoute: () => HealerRoute,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
@@ -177,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/healer': typeof HealerRouteWithChildren
+  '/healer-signup': typeof HealerSignupRoute
   '/login': typeof LoginRoute
   '/seeker-login': typeof SeekerLoginRoute
   '/seeker-signup': typeof SeekerSignupRoute
@@ -196,7 +233,12 @@ export interface FileRoutesByFullPath {
   '/seekers': typeof AuthenticatedSeekersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
+  '/healer/bookings': typeof HealerBookingsRoute
   '/healer/dashboard': typeof HealerDashboardRoute
+  '/healer/earnings': typeof HealerEarningsRoute
+  '/healer/events': typeof HealerEventsRoute
+  '/healer/profile': typeof HealerProfileRoute
+  '/healer/settings': typeof HealerSettingsRoute
   '/bookings/$id': typeof AuthenticatedBookingsIdRoute
   '/healers/$id': typeof AuthenticatedHealersIdRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
@@ -205,6 +247,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/healer': typeof HealerRouteWithChildren
+  '/healer-signup': typeof HealerSignupRoute
   '/login': typeof LoginRoute
   '/seeker-login': typeof SeekerLoginRoute
   '/seeker-signup': typeof SeekerSignupRoute
@@ -224,7 +267,12 @@ export interface FileRoutesByTo {
   '/seekers': typeof AuthenticatedSeekersRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/users': typeof AuthenticatedUsersRouteWithChildren
+  '/healer/bookings': typeof HealerBookingsRoute
   '/healer/dashboard': typeof HealerDashboardRoute
+  '/healer/earnings': typeof HealerEarningsRoute
+  '/healer/events': typeof HealerEventsRoute
+  '/healer/profile': typeof HealerProfileRoute
+  '/healer/settings': typeof HealerSettingsRoute
   '/bookings/$id': typeof AuthenticatedBookingsIdRoute
   '/healers/$id': typeof AuthenticatedHealersIdRoute
   '/users/$id': typeof AuthenticatedUsersIdRoute
@@ -235,6 +283,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
   '/healer': typeof HealerRouteWithChildren
+  '/healer-signup': typeof HealerSignupRoute
   '/login': typeof LoginRoute
   '/seeker-login': typeof SeekerLoginRoute
   '/seeker-signup': typeof SeekerSignupRoute
@@ -254,7 +303,12 @@ export interface FileRoutesById {
   '/_authenticated/seekers': typeof AuthenticatedSeekersRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRouteWithChildren
+  '/healer/bookings': typeof HealerBookingsRoute
   '/healer/dashboard': typeof HealerDashboardRoute
+  '/healer/earnings': typeof HealerEarningsRoute
+  '/healer/events': typeof HealerEventsRoute
+  '/healer/profile': typeof HealerProfileRoute
+  '/healer/settings': typeof HealerSettingsRoute
   '/_authenticated/bookings/$id': typeof AuthenticatedBookingsIdRoute
   '/_authenticated/healers/$id': typeof AuthenticatedHealersIdRoute
   '/_authenticated/users/$id': typeof AuthenticatedUsersIdRoute
@@ -265,6 +319,7 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot-password'
     | '/healer'
+    | '/healer-signup'
     | '/login'
     | '/seeker-login'
     | '/seeker-signup'
@@ -284,7 +339,12 @@ export interface FileRouteTypes {
     | '/seekers'
     | '/settings'
     | '/users'
+    | '/healer/bookings'
     | '/healer/dashboard'
+    | '/healer/earnings'
+    | '/healer/events'
+    | '/healer/profile'
+    | '/healer/settings'
     | '/bookings/$id'
     | '/healers/$id'
     | '/users/$id'
@@ -293,6 +353,7 @@ export interface FileRouteTypes {
     | '/'
     | '/forgot-password'
     | '/healer'
+    | '/healer-signup'
     | '/login'
     | '/seeker-login'
     | '/seeker-signup'
@@ -312,7 +373,12 @@ export interface FileRouteTypes {
     | '/seekers'
     | '/settings'
     | '/users'
+    | '/healer/bookings'
     | '/healer/dashboard'
+    | '/healer/earnings'
+    | '/healer/events'
+    | '/healer/profile'
+    | '/healer/settings'
     | '/bookings/$id'
     | '/healers/$id'
     | '/users/$id'
@@ -322,6 +388,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/forgot-password'
     | '/healer'
+    | '/healer-signup'
     | '/login'
     | '/seeker-login'
     | '/seeker-signup'
@@ -341,7 +408,12 @@ export interface FileRouteTypes {
     | '/_authenticated/seekers'
     | '/_authenticated/settings'
     | '/_authenticated/users'
+    | '/healer/bookings'
     | '/healer/dashboard'
+    | '/healer/earnings'
+    | '/healer/events'
+    | '/healer/profile'
+    | '/healer/settings'
     | '/_authenticated/bookings/$id'
     | '/_authenticated/healers/$id'
     | '/_authenticated/users/$id'
@@ -352,6 +424,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   HealerRoute: typeof HealerRouteWithChildren
+  HealerSignupRoute: typeof HealerSignupRoute
   LoginRoute: typeof LoginRoute
   SeekerLoginRoute: typeof SeekerLoginRoute
   SeekerSignupRoute: typeof SeekerSignupRoute
@@ -378,6 +451,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/healer-signup': {
+      id: '/healer-signup'
+      path: '/healer-signup'
+      fullPath: '/healer-signup'
+      preLoaderRoute: typeof HealerSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/healer': {
@@ -408,11 +488,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/healer/settings': {
+      id: '/healer/settings'
+      path: '/settings'
+      fullPath: '/healer/settings'
+      preLoaderRoute: typeof HealerSettingsRouteImport
+      parentRoute: typeof HealerRoute
+    }
+    '/healer/profile': {
+      id: '/healer/profile'
+      path: '/profile'
+      fullPath: '/healer/profile'
+      preLoaderRoute: typeof HealerProfileRouteImport
+      parentRoute: typeof HealerRoute
+    }
+    '/healer/events': {
+      id: '/healer/events'
+      path: '/events'
+      fullPath: '/healer/events'
+      preLoaderRoute: typeof HealerEventsRouteImport
+      parentRoute: typeof HealerRoute
+    }
+    '/healer/earnings': {
+      id: '/healer/earnings'
+      path: '/earnings'
+      fullPath: '/healer/earnings'
+      preLoaderRoute: typeof HealerEarningsRouteImport
+      parentRoute: typeof HealerRoute
+    }
     '/healer/dashboard': {
       id: '/healer/dashboard'
       path: '/dashboard'
       fullPath: '/healer/dashboard'
       preLoaderRoute: typeof HealerDashboardRouteImport
+      parentRoute: typeof HealerRoute
+    }
+    '/healer/bookings': {
+      id: '/healer/bookings'
+      path: '/bookings'
+      fullPath: '/healer/bookings'
+      preLoaderRoute: typeof HealerBookingsRouteImport
       parentRoute: typeof HealerRoute
     }
     '/_authenticated/users': {
@@ -629,11 +744,21 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 )
 
 interface HealerRouteChildren {
+  HealerBookingsRoute: typeof HealerBookingsRoute
   HealerDashboardRoute: typeof HealerDashboardRoute
+  HealerEarningsRoute: typeof HealerEarningsRoute
+  HealerEventsRoute: typeof HealerEventsRoute
+  HealerProfileRoute: typeof HealerProfileRoute
+  HealerSettingsRoute: typeof HealerSettingsRoute
 }
 
 const HealerRouteChildren: HealerRouteChildren = {
+  HealerBookingsRoute: HealerBookingsRoute,
   HealerDashboardRoute: HealerDashboardRoute,
+  HealerEarningsRoute: HealerEarningsRoute,
+  HealerEventsRoute: HealerEventsRoute,
+  HealerProfileRoute: HealerProfileRoute,
+  HealerSettingsRoute: HealerSettingsRoute,
 }
 
 const HealerRouteWithChildren =
@@ -644,6 +769,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
   HealerRoute: HealerRouteWithChildren,
+  HealerSignupRoute: HealerSignupRoute,
   LoginRoute: LoginRoute,
   SeekerLoginRoute: SeekerLoginRoute,
   SeekerSignupRoute: SeekerSignupRoute,

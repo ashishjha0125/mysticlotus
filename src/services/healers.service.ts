@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { api } from "@/lib/api";
+import { createClient } from "@supabase/supabase-js";
 import type { Paginated } from "./users.service";
 
 const SUPABASE_ENABLED =
@@ -151,20 +152,50 @@ export const HealersService = {
     name: string;
     email: string;
     phone?: string;
+    password?: string;
     primaryModality?: string;
   }): Promise<Healer> => {
     if (!SUPABASE_ENABLED) {
       return api.post<Healer>("/admin/healers", payload).then((r) => r.data);
     }
+
+    let authUserId: string | undefined = undefined;
+    if (payload.password) {
+      const tempClient = createClient(
+        import.meta.env.VITE_SUPABASE_URL,
+        import.meta.env.VITE_SUPABASE_ANON_KEY,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+      );
+      const { data: authData, error: authErr } = await tempClient.auth.signUp({
+        email: payload.email,
+        password: payload.password,
+        options: {
+          data: { name: payload.name, role: "healer" },
+        },
+      });
+      if (authErr) {
+        throw new Error(`Failed to register login account: ${authErr.message}`);
+      }
+      if (authData?.user?.id) {
+        authUserId = authData.user.id;
+      }
+    }
+
+    const insertUserObj: any = {
+      name: payload.name.trim(),
+      email: payload.email.trim().toLowerCase(),
+      phone: payload.phone?.trim() || null,
+      role: "healer",
+      roles: ["healer"],
+      status: "active",
+    };
+    if (authUserId) {
+      insertUserObj.id = authUserId;
+    }
+
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .insert({
-        name: payload.name.trim(),
-        email: payload.email.trim().toLowerCase(),
-        phone: payload.phone?.trim() || null,
-        role: "healer",
-        status: "pending",
-      })
+      .insert(insertUserObj)
       .select()
       .single();
 
@@ -174,7 +205,7 @@ export const HealersService = {
       .from("healers")
       .insert({
         id: userData.id,
-        status: "pending",
+        status: "approved",
         modalities: [payload.primaryModality?.trim() || "Pranic Healing"],
         primary_modality: payload.primaryModality?.trim() || "Pranic Healing",
         documents_verified: false,

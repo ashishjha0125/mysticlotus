@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { LoadingState, ErrorState } from "@/components/admin/States";
-import { UsersService, type User } from "@/services/users.service";
+import { UsersService, type User, type UserRole, ROLE_LABELS } from "@/services/users.service";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +27,15 @@ export const Route = createFileRoute("/_authenticated/users/$id")({
   component: UserDetailPage,
 });
 
-type FormValues = { name: string; email: string; phone?: string; role: User["role"]; status: User["status"] };
+const ALL_ROLES: { id: UserRole; label: string }[] = [
+  { id: "admin", label: "Admin - site admin" },
+  { id: "seeker", label: "Seeker" },
+  { id: "healer", label: "Healer" },
+  { id: "coach", label: "Coach" },
+  { id: "therapist", label: "Therapist / Counsellor / Psychiatrist / Psychologist" },
+];
+
+type FormValues = { name: string; email: string; phone?: string; role: User["role"]; roles: UserRole[]; status: User["status"] };
 
 function UserDetailPage() {
   const { id } = Route.useParams();
@@ -44,6 +52,7 @@ function UserDetailPage() {
         email: query.data.email,
         phone: query.data.phone ?? "",
         role: query.data.role,
+        roles: query.data.roles && query.data.roles.length > 0 ? query.data.roles : [query.data.role],
         status: query.data.status,
       });
     }
@@ -61,6 +70,20 @@ function UserDetailPage() {
   if (query.isLoading) return <LoadingState />;
   if (query.isError) return <ErrorState error={query.error} onRetry={() => query.refetch()} />;
   const u = query.data!;
+
+  const currentRoles = form.watch("roles") || [form.watch("role") || "seeker"];
+  const toggleRole = (r: UserRole) => {
+    const prev = currentRoles;
+    let updated: UserRole[];
+    if (prev.includes(r)) {
+      if (prev.length === 1) return;
+      updated = prev.filter((item) => item !== r);
+    } else {
+      updated = [...prev, r];
+    }
+    form.setValue("roles", updated, { shouldDirty: true });
+    form.setValue("role", updated[0], { shouldDirty: true });
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -85,8 +108,12 @@ function UserDetailPage() {
           <h3 className="mt-3 text-base font-semibold">{u.name}</h3>
           <p className="text-xs text-muted-foreground">{u.email}</p>
           <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-            <Badge variant="outline" className="capitalize">{u.role}</Badge>
-            <Badge variant="outline" className="capitalize">{u.status}</Badge>
+            {(u.roles && u.roles.length > 0 ? u.roles : [u.role]).map((r) => (
+              <Badge key={r} variant="outline" className="text-xs font-medium">
+                {ROLE_LABELS[r] ?? r}
+              </Badge>
+            ))}
+            <Badge variant="outline" className="capitalize bg-muted/50">{u.status}</Badge>
           </div>
           <div className="mt-5 space-y-2 text-left text-xs text-muted-foreground">
             <div className="flex justify-between"><span>Phone</span><span className="text-foreground">{u.phone ?? "—"}</span></div>
@@ -114,20 +141,6 @@ function UserDetailPage() {
               <Input {...form.register("phone")} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Role</Label>
-              <Select
-                value={form.watch("role")}
-                onValueChange={(v) => form.setValue("role", v as User["role"])}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="seeker">Customer / Seeker</SelectItem>
-                  <SelectItem value="healer">Healer</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-1.5">
               <Label>Status</Label>
               <Select
                 value={form.watch("status")}
@@ -141,6 +154,32 @@ function UserDetailPage() {
                   <SelectItem value="suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="sm:col-span-2 flex flex-col gap-2">
+              <Label>Assigned Roles (Select one or more)</Label>
+              <div className="flex flex-wrap gap-2 border rounded-xl p-3 bg-muted/20">
+                {ALL_ROLES.map((r) => {
+                  const active = currentRoles.includes(r.id);
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => toggleRole(r.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        active
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-background border border-border text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <span className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center text-[10px] ${active ? "border-primary-foreground bg-primary-foreground text-primary font-bold" : "border-muted-foreground"}`}>
+                        {active ? "✓" : ""}
+                      </span>
+                      {r.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="sm:col-span-2 flex justify-end">

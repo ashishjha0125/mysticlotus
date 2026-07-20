@@ -7,7 +7,8 @@ create table public.users (
   name text not null,
   email text unique not null,
   phone text,
-  role text not null check (role in ('seeker', 'healer', 'admin')),
+  role text not null check (role in ('seeker', 'healer', 'admin', 'coach', 'therapist')),
+  roles text[] default '{}',
   status text not null check (status in ('active', 'blocked', 'suspended', 'pending')) default 'pending',
   avatar_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -126,5 +127,10 @@ alter table public.healers add column if not exists twitter_link text;
 alter table public.healers add column if not exists linkedin_link text;
 alter table public.healers add column if not exists instagram_link text;
 alter table public.healers add column if not exists pinterest_link text;
-alter table public.healers add column if not exists google_link text;
 alter table public.healers add column if not exists status_remark text;
+
+-- ALTER USERS TABLE FOR MULTI-ROLE & EXPANDED ROLES
+alter table public.users drop constraint if exists users_role_check;
+alter table public.users add constraint users_role_check check (role in ('seeker', 'healer', 'admin', 'coach', 'therapist'));
+alter table public.users add column if not exists roles text[] default '{}';
+

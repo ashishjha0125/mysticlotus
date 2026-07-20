@@ -6,7 +6,7 @@ import { Ban, MoreHorizontal, Pause, Search, Trash2, UserPlus, UserRound } from 
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { LoadingState, ErrorState, EmptyState } from "@/components/admin/States";
-import { UsersService, type User, type UserStatus } from "@/services/users.service";
+import { UsersService, type User, type UserRole, type UserStatus, ROLE_LABELS } from "@/services/users.service";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -67,14 +67,33 @@ const statusStyles: Record<UserStatus, string> = {
   pending: "bg-muted text-muted-foreground border-border",
 };
 
+const ALL_ROLES: { id: UserRole; label: string }[] = [
+  { id: "admin", label: "Admin - site admin" },
+  { id: "seeker", label: "Seeker" },
+  { id: "healer", label: "Healer" },
+  { id: "coach", label: "Coach" },
+  { id: "therapist", label: "Therapist / Counsellor / Psychiatrist / Psychologist" },
+];
+
 function AddUserDialog() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<User["role"]>("seeker");
+  const [password, setPassword] = useState("");
+  const [roles, setRoles] = useState<UserRole[]>(["seeker"]);
   const [status, setStatus] = useState<User["status"]>("active");
+
+  const toggleRole = (r: UserRole) => {
+    setRoles((prev) => {
+      if (prev.includes(r)) {
+        if (prev.length === 1) return prev;
+        return prev.filter((item) => item !== r);
+      }
+      return [...prev, r];
+    });
+  };
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -82,17 +101,20 @@ function AddUserDialog() {
         name,
         email,
         phone: phone || undefined,
-        role,
+        password: password || undefined,
+        roles,
+        role: roles[0],
         status,
       }),
     onSuccess: () => {
-      toast.success("User added successfully");
+      toast.success("User added successfully & login credentials created if password was entered!");
       qc.invalidateQueries({ queryKey: ["users"] });
       setOpen(false);
       setName("");
       setEmail("");
       setPhone("");
-      setRole("seeker");
+      setPassword("");
+      setRoles(["seeker"]);
       setStatus("active");
     },
     onError: (err: any) => {
@@ -105,14 +127,14 @@ function AddUserDialog() {
       <DialogTrigger asChild>
         <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
           <UserPlus className="mr-1.5 h-4 w-4" />
-          Add User
+          Add User / Practitioner
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
+          <DialogTitle>Add New User or Practitioner</DialogTitle>
           <DialogDescription>
-            Add a new seeker, healer, or admin user directly to the platform.
+            Create a user or practitioner, assign roles, and optionally set an initial login password.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -121,7 +143,7 @@ function AddUserDialog() {
             if (!name.trim() || !email.trim()) return;
             createMutation.mutate();
           }}
-          className="flex flex-col gap-4 py-2"
+          className="flex flex-col gap-4 py-2 max-h-[70vh] overflow-y-auto pr-1"
         >
           <div className="flex flex-col gap-1.5">
             <Label>Full Name *</Label>
@@ -143,6 +165,18 @@ function AddUserDialog() {
             />
           </div>
           <div className="flex flex-col gap-1.5">
+            <Label className="flex items-center justify-between">
+              <span>Create Login Password</span>
+              <span className="text-[10px] text-muted-foreground font-normal">(Optional - allows user/healer to log in immediately)</span>
+            </Label>
+            <Input
+              type="text"
+              placeholder="e.g. Healer@1234 (Share with practitioner)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
             <Label>Phone Number</Label>
             <Input
               placeholder="e.g. +1 555 019 2834"
@@ -150,30 +184,42 @@ function AddUserDialog() {
               onChange={(e) => setPhone(e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1.5">
-              <Label>Role</Label>
-              <Select value={role} onValueChange={(v) => setRole(v as User["role"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="seeker">Seeker</SelectItem>
-                  <SelectItem value="healer">Healer</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="flex flex-col gap-2">
+            <Label>Assign Roles (Select one or more) *</Label>
+            <div className="flex flex-wrap gap-2 border rounded-xl p-3 bg-muted/20">
+              {ALL_ROLES.map((r) => {
+                const active = roles.includes(r.id);
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => toggleRole(r.id)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      active
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-background border border-border text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center text-[10px] ${active ? "border-primary-foreground bg-primary-foreground text-primary font-bold" : "border-muted-foreground"}`}>
+                      {active ? "✓" : ""}
+                    </span>
+                    {r.label}
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex flex-col gap-1.5">
-              <Label>Status</Label>
-              <Select value={status} onValueChange={(v) => setStatus(v as User["status"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                  <SelectItem value="blocked">Blocked</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Status</Label>
+            <Select value={status} onValueChange={(v) => setStatus(v as User["status"])}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="suspended">Suspended</SelectItem>
+                <SelectItem value="blocked">Blocked</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
@@ -283,14 +329,16 @@ function UsersPage() {
             </SelectContent>
           </Select>
           <Select value={role} onValueChange={(v) => { setPage(1); setRole(v); }}>
-            <SelectTrigger className="w-full sm:w-[150px]">
+            <SelectTrigger className="w-full sm:w-[220px]">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All roles</SelectItem>
               <SelectItem value="seeker">Seeker</SelectItem>
               <SelectItem value="healer">Healer</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="coach">Coach</SelectItem>
+              <SelectItem value="therapist">Therapist / Counsellor / Psychiatrist / Psychologist</SelectItem>
+              <SelectItem value="admin">Admin - site admin</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -313,7 +361,7 @@ function UsersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
+                  <TableHead>Role(s)</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -343,9 +391,13 @@ function UsersPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="capitalize">
-                        {u.role}
-                      </Badge>
+                      <div className="flex flex-wrap gap-1 max-w-[240px]">
+                        {(u.roles && u.roles.length > 0 ? u.roles : [u.role]).map((r) => (
+                          <Badge key={r} variant="outline" className="text-[11px] font-medium">
+                            {ROLE_LABELS[r] ?? r}
+                          </Badge>
+                        ))}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={`capitalize ${statusStyles[u.status]}`}>

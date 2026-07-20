@@ -167,11 +167,19 @@ function LoginPage() {
           </Button>
         </form>
 
-        <div className="mt-5 text-center text-xs text-muted-foreground">
-          Are you a seeker?{" "}
-          <Link to="/seeker-login" className="font-semibold text-primary hover:underline">
-            Seeker Sign In
-          </Link>
+        <div className="mt-5 text-center text-xs text-muted-foreground flex flex-col gap-1.5">
+          <div>
+            Are you a seeker?{" "}
+            <Link to="/seeker-login" className="font-semibold text-primary hover:underline">
+              Seeker Sign In
+            </Link>
+          </div>
+          <div>
+            Want to offer sessions?{" "}
+            <Link to="/healer-signup" className="font-semibold text-[#1f5c5c] hover:underline">
+              Join as a Practitioner / Healer
+            </Link>
+          </div>
         </div>
 
         {!import.meta.env.VITE_API_URL && (

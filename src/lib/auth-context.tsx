@@ -14,6 +14,7 @@ export type Admin = {
   email: string;
   avatarUrl?: string | null;
   role?: string;
+  roles?: string[];
 };
 
 type AuthState = {
@@ -37,6 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Supabase Auth path ─────────────────────────────────────────────────────
   const refreshSupabase = useCallback(async () => {
+    if (!SUPABASE_ENABLED) {
+      setAdmin(null);
+      setLoading(false);
+      return;
+    }
     try {
       const {
         data: { session },
@@ -51,17 +57,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Fetch admin profile from our users table
       const { data: profile } = await supabase
         .from("users")
-        .select("id, name, email, role, avatar_url")
+        .select("id, name, email, role, roles, avatar_url")
         .eq("email", session.user.email)
         .single();
 
       if (profile) {
+        const rolesArr = profile.roles && profile.roles.length > 0 ? profile.roles : [profile.role || "seeker"];
         setAdmin({
           id: profile.id,
           name: profile.name,
           email: profile.email,
           avatarUrl: profile.avatar_url,
-          role: profile.role,
+          role: rolesArr[0],
+          roles: rolesArr,
         });
       } else {
         // Fallback: build admin from Supabase auth user but default to seeker
@@ -71,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: session.user.email ?? "",
           avatarUrl: null,
           role: "seeker",
+          roles: ["seeker"],
         });
       }
     } catch {
@@ -82,6 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginSupabase = useCallback(
     async (email: string, password: string, _remember: boolean) => {
+      if (!SUPABASE_ENABLED) {
+        throw new Error("Supabase is not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.");
+      }
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -93,6 +105,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logoutSupabase = useCallback(async () => {
+    if (!SUPABASE_ENABLED) {
+      setAdmin(null);
+      return;
+    }
     await supabase.auth.signOut();
     setAdmin(null);
   }, []);
@@ -105,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh();
 
+    if (!SUPABASE_ENABLED) return;
     const { data: listener } = supabase.auth.onAuthStateChange(() => {
       void refreshSupabase();
     });

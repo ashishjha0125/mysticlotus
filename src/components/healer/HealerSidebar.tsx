@@ -2,65 +2,80 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import {
   LayoutDashboard,
-  User,
-  Calendar,
+  UserCheck,
+  Users,
   Wallet,
   CalendarDays,
+  Settings,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { name: "Dashboard", href: "/healer/dashboard", icon: LayoutDashboard },
-  { name: "My Profile", href: "/healer/dashboard", icon: User },
-  { name: "My Schedule", href: "/healer/dashboard", icon: Calendar },
-  { name: "Earnings", href: "/healer/dashboard", icon: Wallet },
-  { name: "Events/Courses", href: "/healer/dashboard", icon: CalendarDays },
+  { name: "Overview", href: "/healer/dashboard", icon: LayoutDashboard },
+  { name: "Healer Profile", href: "/healer/profile", icon: UserCheck },
+  { name: "Bookings / Clients", href: "/healer/bookings", icon: Users },
+  { name: "Earnings", href: "/healer/earnings", icon: Wallet },
+  { name: "Events & Workshops", href: "/healer/events", icon: CalendarDays },
+  { name: "Settings", href: "/healer/settings", icon: Settings },
 ];
 
 export function HealerSidebar() {
-  const { logout } = useAuth();
+  const { logout, admin } = useAuth();
   const location = useLocation();
 
   return (
-    <div className="flex h-screen w-64 flex-col border-r border-border/50 bg-[#fbfbfb]">
+    <div className="flex h-screen w-64 flex-col border-r border-border/60 bg-[#f2f5f3] text-[#1a1a1a] shadow-sm flex-shrink-0">
       {/* Logo */}
-      <div className="flex h-20 items-center px-8">
-        <h1 className="font-display text-xl font-bold text-[#1f5c5c]">
+      <div className="flex h-20 items-center px-8 border-b border-border/40">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-[#1f5c5c]">
           HealConnect
         </h1>
       </div>
 
       {/* Navigation */}
-      <div className="flex-1 px-4 py-4 space-y-1">
+      <div className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.href || (location.pathname.startsWith(item.href) && item.href !== '/healer');
+          const isActive =
+            location.pathname === item.href ||
+            (item.href !== "/healer/dashboard" && location.pathname.startsWith(item.href));
           return (
             <Link
               key={item.name}
               to={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                "flex items-center gap-3.5 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200",
                 isActive
-                  ? "bg-[#347676] text-white shadow-sm"
-                  : "text-muted-foreground hover:bg-[#347676]/10 hover:text-[#347676]"
+                  ? "bg-[#1f5c5c] text-white shadow-md shadow-[#1f5c5c]/20"
+                  : "text-gray-600 hover:bg-white/80 hover:text-[#1f5c5c] hover:shadow-sm"
               )}
             >
-              <item.icon className="h-4 w-4" />
-              {item.name}
+              <item.icon className={cn("h-4 w-4", isActive ? "text-white" : "text-gray-500")} />
+              <span>{item.name}</span>
             </Link>
           );
         })}
       </div>
 
-      {/* Footer (Sign Out) */}
-      <div className="border-t border-border/50 p-4">
+      {/* Practitioner Mini Badge & Logout */}
+      <div className="border-t border-border/40 p-4 space-y-3 bg-white/50">
+        <div className="flex items-center gap-3 px-2 py-1">
+          <div className="h-9 w-9 rounded-full bg-[#1f5c5c]/10 text-[#1f5c5c] flex items-center justify-center font-bold text-xs">
+            {(admin?.name || "Healer").slice(0, 2).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold text-gray-900">{admin?.name || "Practitioner"}</p>
+            <p className="truncate text-[10px] uppercase tracking-wider font-semibold text-[#1f5c5c]">
+              {admin?.role || "healer"}
+            </p>
+          </div>
+        </div>
         <button
           onClick={() => logout()}
-          className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
         >
           <LogOut className="h-4 w-4" />
-          Sign Out
+          <span>Sign Out</span>
         </button>
       </div>
     </div>
