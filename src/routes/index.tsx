@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { HealersService } from "@/services/healers.service";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -158,6 +160,14 @@ function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
+
+  const healersQuery = useQuery({
+    queryKey: ["healers", "public", activeSearch],
+    queryFn: () => HealersService.list({ status: "approved", search: activeSearch, limit: 6 }),
+  });
+
+  const displayedHealers = healersQuery.data?.data?.length ? healersQuery.data.data : [];
 
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -190,13 +200,14 @@ function LandingPage() {
           {/* Desktop Actions */}
           <div className="hidden items-center gap-2.5 md:flex">
             <Link
-              to="/seeker-login"
+              to="/login"
+              search={{}}
               className="rounded-lg px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
             >
               Login
             </Link>
             <Link
-              to="/seeker-login"
+              to="/signup"
               className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary/90 hover:shadow-elevated"
             >
               Join
@@ -243,7 +254,7 @@ function LandingPage() {
                   Login
                 </Link>
                 <Link
-                  to="/seeker-login"
+                  to="/signup"
                   className="mt-1 rounded-xl bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground"
                 >
                   Join Mystic Lotus
@@ -320,7 +331,10 @@ function LandingPage() {
                     className="h-11 w-full rounded-xl border-0 bg-transparent pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
                   />
                 </div>
-                <button className="h-11 rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary/90 hover:shadow-elevated">
+                <button 
+                  onClick={() => setActiveSearch(searchQuery)}
+                  className="h-11 rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:bg-primary/90 hover:shadow-elevated"
+                >
                   Search
                 </button>
               </div>
@@ -336,6 +350,10 @@ function LandingPage() {
                 (tag) => (
                   <button
                     key={tag}
+                    onClick={() => {
+                      setSearchQuery(tag);
+                      setActiveSearch(tag);
+                    }}
                     className="rounded-full border border-border/70 bg-background/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-foreground"
                   >
                     {tag}
@@ -366,41 +384,54 @@ function LandingPage() {
             </motion.div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {practitioners.map((p, i) => (
-                <motion.div
-                  key={p.name}
-                  variants={fadeUp}
-                  custom={i + 1}
-                  className="glass shadow-soft group cursor-pointer overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-elevated hover:-translate-y-1"
-                >
-                  <div className="relative h-52 overflow-hidden sm:h-56">
-                    <img
-                      src={p.photo}
-                      alt={p.name}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1 text-xs font-medium backdrop-blur-md">
-                      <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
-                      {p.rating} ({p.reviews})
+              {displayedHealers.length === 0 ? (
+                <div className="col-span-full py-10 text-center text-muted-foreground">
+                  No healers found matching your search.
+                </div>
+              ) : (
+                displayedHealers.map((p: any, i) => (
+                  <motion.div
+                    key={p.id || p.name}
+                    variants={fadeUp}
+                    custom={i + 1}
+                    className="glass shadow-soft group cursor-pointer overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-elevated hover:-translate-y-1"
+                  >
+                    <div className="relative h-52 overflow-hidden sm:h-56">
+                      <img
+                        src={p.mainPhotoUrl || p.avatarUrl || "/images/placeholder-user.jpg"}
+                        alt={p.name}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 bg-muted"
+                      />
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-background/80 px-3 py-1 text-xs font-medium backdrop-blur-md">
+                        <Star className="h-3.5 w-3.5 fill-yellow-500 text-yellow-500" />
+                        {p.rating || "New"}
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-5">
-                    <p className="text-xs font-medium uppercase tracking-wider text-primary">
-                      {p.specialty}
-                    </p>
-                    <h3 className="mt-1.5 text-lg font-semibold text-foreground">
-                      {p.name}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
-                      {p.bio}
-                    </p>
-                    <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {p.location}
+                    <div className="p-5">
+                      <p className="text-xs font-medium uppercase tracking-wider text-primary">
+                        {p.primaryModality || "Holistic Healer"}
+                      </p>
+                      <h3 className="mt-1.5 text-lg font-semibold text-foreground">
+                        {p.name}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                        {p.bio || "Passionate healer ready to support your journey to wellness."}
+                      </p>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {p.city ? `${p.city}${p.state ? `, ${p.state}` : ""}` : "Online"}
+                        </div>
+                        {p.feeRange && (
+                          <div className="font-medium text-foreground">
+                            {p.feeCurrency} {p.feeRange}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                ))
+              )}
             </div>
           </motion.div>
         </div>
@@ -784,14 +815,6 @@ function LandingPage() {
             <p className="text-xs text-muted-foreground">
               © 2026 Mystic Lotus & Dragonflies. All rights reserved.
             </p>
-            <div className="flex items-center gap-2">
-              <Link
-                to="/login"
-                className="rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                Admin Login
-              </Link>
-            </div>
           </div>
         </div>
       </footer>

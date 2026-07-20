@@ -39,7 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ── Supabase Auth path ─────────────────────────────────────────────────────
   const refreshSupabase = useCallback(async () => {
     if (!SUPABASE_ENABLED) {
-      setAdmin(null);
+      const mockAdmin = localStorage.getItem("mock_admin");
+      if (mockAdmin) {
+        setAdmin(JSON.parse(mockAdmin));
+      } else {
+        setAdmin(null);
+      }
       setLoading(false);
       return;
     }
@@ -92,7 +97,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginSupabase = useCallback(
     async (email: string, password: string, _remember: boolean) => {
       if (!SUPABASE_ENABLED) {
-        throw new Error("Supabase is not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file.");
+        // Mock login
+        if (email === "admin@mysticlotus.com" && password === "admin123") {
+          const mockUser: Admin = {
+            id: "mock-admin-id",
+            name: "Admin User",
+            email: "admin@mysticlotus.com",
+            role: "admin",
+            roles: ["admin"],
+          };
+          localStorage.setItem("mock_admin", JSON.stringify(mockUser));
+          await refreshSupabase();
+          return;
+        } else if (email === "aria.thorne@healing.com" && password === "healer123") {
+          const mockHealer: Admin = {
+            id: "mock-healer-id",
+            name: "Aria Thorne",
+            email: "aria.thorne@healing.com",
+            role: "healer",
+            roles: ["healer"],
+          };
+          localStorage.setItem("mock_admin", JSON.stringify(mockHealer));
+          await refreshSupabase();
+          return;
+        }
+        throw new Error("Invalid mock credentials");
       }
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -106,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutSupabase = useCallback(async () => {
     if (!SUPABASE_ENABLED) {
+      localStorage.removeItem("mock_admin");
       setAdmin(null);
       return;
     }

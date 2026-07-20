@@ -244,9 +244,9 @@ export const HealersService = {
       query = query.eq("status", params.status);
     }
     if (params.search) {
+      const qs = params.search.trim();
       query = query.or(
-        `users.name.ilike.%${params.search}%,users.email.ilike.%${params.search}%`,
-        { foreignTable: "users" },
+        `users.name.ilike.%${qs}%,users.email.ilike.%${qs}%,primary_modality.ilike.%${qs}%,bio.ilike.%${qs}%,experience_summary.ilike.%${qs}%,healing_tool.ilike.%${qs}%`
       );
     }
 

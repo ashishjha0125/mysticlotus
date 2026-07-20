@@ -57,7 +57,7 @@ function LoginPage() {
     setSubmitting(true);
     try {
       await login(values.email, values.password, values.remember ?? false);
-      toast.success("Welcome back");
+      toast.success("Welcome back!");
       // Navigation is handled by the isAuthenticated check above
     } catch (err) {
       const message =
@@ -89,10 +89,10 @@ function LoginPage() {
             <Leaf className="h-6 w-6" />
           </div>
           <h1 className="mt-4 font-display text-2xl font-semibold tracking-tight">
-            Mystic Lotus & Dragonflies
+            Sign In
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Healer & Admin sign in
+            Welcome back to Mystic Lotus & Dragonflies
           </p>
         </div>
 
@@ -103,7 +103,7 @@ function LoginPage() {
               id="email"
               type="email"
               autoComplete="email"
-              placeholder="healer@mysticlotus.com"
+              placeholder="you@example.com"
               {...form.register("email")}
             />
             {form.formState.errors.email && (
@@ -162,57 +162,29 @@ function LoginPage() {
                 Signing in…
               </>
             ) : (
-              "Sign in"
+              "Sign In"
             )}
           </Button>
         </form>
 
-        <div className="mt-5 text-center text-xs text-muted-foreground flex flex-col gap-1.5">
-          <div>
-            Are you a seeker?{" "}
-            <Link to="/seeker-login" className="font-semibold text-primary hover:underline">
-              Seeker Sign In
-            </Link>
-          </div>
-          <div>
-            Want to offer sessions?{" "}
-            <Link to="/healer-signup" className="font-semibold text-[#1f5c5c] hover:underline">
-              Join as a Practitioner / Healer
-            </Link>
-          </div>
+        {/* Divider */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border/60" />
+          <span className="text-xs text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border/60" />
         </div>
 
-        {!import.meta.env.VITE_API_URL && (
-          <div className="mt-6 rounded-2xl border border-primary/20 bg-primary/5 p-4 text-xs text-muted-foreground">
-            <p className="font-semibold text-foreground mb-1.5 flex items-center gap-1.5 text-primary">
-              <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-              Running in Mock Mode
-            </p>
-            <p className="mb-2 leading-relaxed">
-              No backend API URL detected. The app is running in offline preview mode with client-side mock data. Use these credentials to sign in:
-            </p>
-            <div className="grid grid-cols-2 gap-2 bg-background/50 p-2.5 rounded-xl border border-border">
-              <div className="col-span-2 text-primary font-semibold border-b border-border/50 pb-1 mb-1">Admin</div>
-              <div>
-                <span className="block font-medium text-foreground">Email:</span>
-                <code className="text-primary font-mono text-xs">admin@mysticlotus.com</code>
-              </div>
-              <div>
-                <span className="block font-medium text-foreground">Password:</span>
-                <code className="text-primary font-mono text-xs">admin123</code>
-              </div>
-              <div className="col-span-2 text-primary font-semibold border-b border-border/50 pb-1 mb-1 mt-2">Healer</div>
-              <div>
-                <span className="block font-medium text-foreground">Email:</span>
-                <code className="text-primary font-mono text-xs">aria.thorne@healing.com</code>
-              </div>
-              <div>
-                <span className="block font-medium text-foreground">Password:</span>
-                <code className="text-primary font-mono text-xs">healer123</code>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Sign up prompt */}
+        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            New to Mystic Lotus?{" "}
+            <Link to="/signup" className="font-semibold text-primary hover:underline">
+              Create your account
+            </Link>
+          </p>
+        </div>
+
+
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Protected area. All activity is logged.

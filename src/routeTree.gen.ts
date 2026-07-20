@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SeekerSignupRouteImport } from './routes/seeker-signup'
 import { Route as SeekerLoginRouteImport } from './routes/seeker-login'
 import { Route as LoginRouteImport } from './routes/login'
@@ -19,6 +20,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HealerSettingsRouteImport } from './routes/healer.settings'
 import { Route as HealerProfileRouteImport } from './routes/healer.profile'
+import { Route as HealerOnboardingRouteImport } from './routes/healer.onboarding'
 import { Route as HealerEventsRouteImport } from './routes/healer.events'
 import { Route as HealerEarningsRouteImport } from './routes/healer.earnings'
 import { Route as HealerDashboardRouteImport } from './routes/healer.dashboard'
@@ -43,6 +45,11 @@ import { Route as AuthenticatedUsersIdRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedHealersIdRouteImport } from './routes/_authenticated.healers.$id'
 import { Route as AuthenticatedBookingsIdRouteImport } from './routes/_authenticated.bookings.$id'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeekerSignupRoute = SeekerSignupRouteImport.update({
   id: '/seeker-signup',
   path: '/seeker-signup',
@@ -90,6 +97,11 @@ const HealerSettingsRoute = HealerSettingsRouteImport.update({
 const HealerProfileRoute = HealerProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => HealerRoute,
+} as any)
+const HealerOnboardingRoute = HealerOnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => HealerRoute,
 } as any)
 const HealerEventsRoute = HealerEventsRouteImport.update({
@@ -217,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/seeker-login': typeof SeekerLoginRoute
   '/seeker-signup': typeof SeekerSignupRoute
+  '/signup': typeof SignupRoute
   '/bookings': typeof AuthenticatedBookingsRouteWithChildren
   '/categories': typeof AuthenticatedCategoriesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -237,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/healer/dashboard': typeof HealerDashboardRoute
   '/healer/earnings': typeof HealerEarningsRoute
   '/healer/events': typeof HealerEventsRoute
+  '/healer/onboarding': typeof HealerOnboardingRoute
   '/healer/profile': typeof HealerProfileRoute
   '/healer/settings': typeof HealerSettingsRoute
   '/bookings/$id': typeof AuthenticatedBookingsIdRoute
@@ -251,6 +265,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/seeker-login': typeof SeekerLoginRoute
   '/seeker-signup': typeof SeekerSignupRoute
+  '/signup': typeof SignupRoute
   '/bookings': typeof AuthenticatedBookingsRouteWithChildren
   '/categories': typeof AuthenticatedCategoriesRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -271,6 +286,7 @@ export interface FileRoutesByTo {
   '/healer/dashboard': typeof HealerDashboardRoute
   '/healer/earnings': typeof HealerEarningsRoute
   '/healer/events': typeof HealerEventsRoute
+  '/healer/onboarding': typeof HealerOnboardingRoute
   '/healer/profile': typeof HealerProfileRoute
   '/healer/settings': typeof HealerSettingsRoute
   '/bookings/$id': typeof AuthenticatedBookingsIdRoute
@@ -287,6 +303,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/seeker-login': typeof SeekerLoginRoute
   '/seeker-signup': typeof SeekerSignupRoute
+  '/signup': typeof SignupRoute
   '/_authenticated/bookings': typeof AuthenticatedBookingsRouteWithChildren
   '/_authenticated/categories': typeof AuthenticatedCategoriesRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -307,6 +324,7 @@ export interface FileRoutesById {
   '/healer/dashboard': typeof HealerDashboardRoute
   '/healer/earnings': typeof HealerEarningsRoute
   '/healer/events': typeof HealerEventsRoute
+  '/healer/onboarding': typeof HealerOnboardingRoute
   '/healer/profile': typeof HealerProfileRoute
   '/healer/settings': typeof HealerSettingsRoute
   '/_authenticated/bookings/$id': typeof AuthenticatedBookingsIdRoute
@@ -323,6 +341,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/seeker-login'
     | '/seeker-signup'
+    | '/signup'
     | '/bookings'
     | '/categories'
     | '/dashboard'
@@ -343,6 +362,7 @@ export interface FileRouteTypes {
     | '/healer/dashboard'
     | '/healer/earnings'
     | '/healer/events'
+    | '/healer/onboarding'
     | '/healer/profile'
     | '/healer/settings'
     | '/bookings/$id'
@@ -357,6 +377,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/seeker-login'
     | '/seeker-signup'
+    | '/signup'
     | '/bookings'
     | '/categories'
     | '/dashboard'
@@ -377,6 +398,7 @@ export interface FileRouteTypes {
     | '/healer/dashboard'
     | '/healer/earnings'
     | '/healer/events'
+    | '/healer/onboarding'
     | '/healer/profile'
     | '/healer/settings'
     | '/bookings/$id'
@@ -392,6 +414,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/seeker-login'
     | '/seeker-signup'
+    | '/signup'
     | '/_authenticated/bookings'
     | '/_authenticated/categories'
     | '/_authenticated/dashboard'
@@ -412,6 +435,7 @@ export interface FileRouteTypes {
     | '/healer/dashboard'
     | '/healer/earnings'
     | '/healer/events'
+    | '/healer/onboarding'
     | '/healer/profile'
     | '/healer/settings'
     | '/_authenticated/bookings/$id'
@@ -428,10 +452,18 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   SeekerLoginRoute: typeof SeekerLoginRoute
   SeekerSignupRoute: typeof SeekerSignupRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seeker-signup': {
       id: '/seeker-signup'
       path: '/seeker-signup'
@@ -500,6 +532,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/healer/profile'
       preLoaderRoute: typeof HealerProfileRouteImport
+      parentRoute: typeof HealerRoute
+    }
+    '/healer/onboarding': {
+      id: '/healer/onboarding'
+      path: '/onboarding'
+      fullPath: '/healer/onboarding'
+      preLoaderRoute: typeof HealerOnboardingRouteImport
       parentRoute: typeof HealerRoute
     }
     '/healer/events': {
@@ -748,6 +787,7 @@ interface HealerRouteChildren {
   HealerDashboardRoute: typeof HealerDashboardRoute
   HealerEarningsRoute: typeof HealerEarningsRoute
   HealerEventsRoute: typeof HealerEventsRoute
+  HealerOnboardingRoute: typeof HealerOnboardingRoute
   HealerProfileRoute: typeof HealerProfileRoute
   HealerSettingsRoute: typeof HealerSettingsRoute
 }
@@ -757,6 +797,7 @@ const HealerRouteChildren: HealerRouteChildren = {
   HealerDashboardRoute: HealerDashboardRoute,
   HealerEarningsRoute: HealerEarningsRoute,
   HealerEventsRoute: HealerEventsRoute,
+  HealerOnboardingRoute: HealerOnboardingRoute,
   HealerProfileRoute: HealerProfileRoute,
   HealerSettingsRoute: HealerSettingsRoute,
 }
@@ -773,6 +814,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   SeekerLoginRoute: SeekerLoginRoute,
   SeekerSignupRoute: SeekerSignupRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
